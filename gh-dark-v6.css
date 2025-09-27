@@ -1,0 +1,163 @@
+/* ---------- GitHub Dark inspired theme + sticky footer ---------- */
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --brand: #2ea043;
+  --brand-fore: #fff;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --warn: #d29922;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial;
+}
+
+/* Links */
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Page wrapper: flex column + sticky footer */
+.wrap {
+  max-width: 980px;
+  min-height: 100svh;             /* 100% of the small viewport height */
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 40px 20px;             /*   margin */
+}
+
+/* Header (hero) */
+.hero {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.hero h1 { margin: 0; font-size: 28px; }
+.logo { display: grid; place-items: center; width: 36px; height: 36px; color: var(--text); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0b1520;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  margin: 18px 0;
+}
+.panel h2 { margin-top: 0; font-size: 20px; }
+
+/* Typographic helpers */
+h4 { font-size: 22px; margin: 0 0 8px; }
+.muted { color: var(--muted); }
+.small { font-size: 16px; }
+
+/* Cards grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.card {
+  background: #0f141a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* Status line with animated dots */
+.status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #0b0f14;
+  margin-top: 8px;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: .6;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.dot-2 { animation-delay: .2s; }
+.dot-3 { animation-delay: .4s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: .3; transform: translateY(0); }
+  50%      { opacity: 1; transform: translateY(-1px); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dot, .dot-2, .dot-3 { animation: none; }
+}
+
+/* Note block */
+.note {
+  border-left: 4px solid var(--warn);
+  padding: 10px 12px;
+  background: #1b1f25;
+  border-radius: 8px;
+  color: var(--text);
+  margin-top: 12px;
+}
+
+/* Code / kbd */
+code, .kbd {
+  background: #11161d;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 90%;
+}
+
+/* Footer — sticky to bottom via margin-top:auto */
+.footer {
+  margin-top: auto;               /*   ,    */
+  margin-bottom: 16px;            /*    */
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.footer a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.footer a:hover { color: var(--accent); text-decoration: underline; }
+
+/* Responsive tweaks */
+@media (max-width: 544px) {
+  .hero h1 { font-size: 24px; }
+  .panel h2 { font-size: 18px; }
+  h4 { font-size: 18px; }
+}

